@@ -37,10 +37,20 @@ class KittiDataset(torch_data.Dataset):
         width, height = im.size
         return height, width, 3
 
-    def get_lidar(self, idx):
-        lidar_file = os.path.join(self.lidar_dir, '%06d.bin' % idx)
-        assert os.path.exists(lidar_file)
-        return np.fromfile(lidar_file, dtype=np.float32).reshape(-1, 4)
+    def get_lidar(self, idx, end2end=True):
+        if not end2end:
+            lidar_file = os.path.join(self.lidar_dir, '%06d.bin' % idx)
+            assert os.path.exists(lidar_file)
+            return np.fromfile(lidar_file, dtype=np.float32).reshape(-1, 4)
+        else:
+            cloud = self.get_depth_network_pred(idx)
+            return cloud
+
+    def get_depth_network_pred(self, idx):
+        datapath = self.imageset_dir
+        pred = psmnet_forward(datapath, idx)
+        pred = transform(pred)
+        return pred
 
     def get_calib(self, idx):
         calib_file = os.path.join(self.calib_dir, '%06d.txt' % idx)
