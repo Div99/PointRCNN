@@ -10,10 +10,10 @@ from lib.config import cfg
 
 
 class KittiRCNNDataset(KittiDataset):
-    def __init__(self, root_dir, npoints=16384, split='train', classes='Car', mode='TRAIN', random_select=True,
+    def __init__(self, root_dir, points_style, npoints=16384, split='train', classes='Car', mode='TRAIN', random_select=True,
                  logger=None, rcnn_training_roi_dir=None, rcnn_training_feature_dir=None, rcnn_eval_roi_dir=None,
                  rcnn_eval_feature_dir=None, gt_database_dir=None):
-        super().__init__(root_dir=root_dir, split=split)
+        super().__init__(root_dir=root_dir, points_style=points_style, split=split)
         if classes == 'Car':
             self.classes = ('Background', 'Car')
             aug_scene_root_dir = os.path.join(root_dir, 'KITTI', 'aug_scene')
@@ -290,8 +290,11 @@ class KittiRCNNDataset(KittiDataset):
                 near_idxs = np.where(pts_near_flag == 1)[0]
                 near_idxs_choice = np.random.choice(near_idxs, self.npoints - len(far_idxs_choice), replace=False)
 
-                choice = np.concatenate((near_idxs_choice, far_idxs_choice), axis=0) \
-                    if len(far_idxs_choice) > 0 else near_idxs_choice
+                if len(far_idxs_choice) > 0:
+                    choice = np.concatenate((near_idxs_choice, far_idxs_choice), axis=0)
+                else:
+                    choice = near_idxs_choice
+
                 np.random.shuffle(choice)
             else:
                 choice = np.arange(0, len(pts_rect), dtype=np.int32)

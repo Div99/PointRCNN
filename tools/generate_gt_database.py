@@ -9,6 +9,7 @@ from lib.datasets.kitti_dataset import KittiDataset
 import argparse
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--points_style', type=str, default='lidar')
 parser.add_argument('--save_dir', type=str, default='./gt_database')
 parser.add_argument('--class_name', type=str, default='Car')
 parser.add_argument('--split', type=str, default='train')
@@ -16,8 +17,8 @@ args = parser.parse_args()
 
 
 class GTDatabaseGenerator(KittiDataset):
-    def __init__(self, root_dir, split='train', classes=args.class_name):
-        super().__init__(root_dir, split=split)
+    def __init__(self, root_dir, points_style, split='train', classes=args.class_name):
+        super().__init__(root_dir, points_style, split=split)
         self.gt_database = None
         if classes == 'Car':
             self.classes = ('Background', 'Car')
@@ -92,7 +93,8 @@ class GTDatabaseGenerator(KittiDataset):
 
 
 if __name__ == '__main__':
-    dataset = GTDatabaseGenerator(root_dir='../data/', split=args.split)
+    dataset = GTDatabaseGenerator(root_dir='../data/', points_style=args.points_style, split=args.split)
+    args.save_dir = os.path.join(args.save_dir, args.points_style)
     os.makedirs(args.save_dir, exist_ok=True)
 
     dataset.generate_gt_database()

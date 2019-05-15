@@ -26,6 +26,7 @@ import tqdm
 np.random.seed(1024)  # set the same seed
 
 parser = argparse.ArgumentParser(description="arg parser")
+parser.add_argument('--points_style', type=str, default='lidar', help='Points style for training')
 parser.add_argument('--cfg_file', type=str, default='cfgs/default.yml', help='specify the config for evaluation')
 parser.add_argument("--eval_mode", type=str, default='rpn', required=True, help="specify the evaluation mode")
 
@@ -846,7 +847,7 @@ def create_dataloader(logger):
     DATA_PATH = os.path.join('..', 'data')
 
     # create dataloader
-    test_set = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TEST.SPLIT, mode=mode,
+    test_set = KittiRCNNDataset(root_dir=DATA_PATH, points_style=args.points_style, npoints=cfg.RPN.NUM_POINTS, split=cfg.TEST.SPLIT, mode=mode,
                                 random_select=args.random_select,
                                 rcnn_eval_roi_dir=args.rcnn_eval_roi_dir,
                                 rcnn_eval_feature_dir=args.rcnn_eval_feature_dir,

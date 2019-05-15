@@ -7,10 +7,10 @@ from PIL import Image
 
 
 class KittiDataset(torch_data.Dataset):
-    def __init__(self, root_dir, split='train'):
+    def __init__(self, root_dir, points_style, split='train'):
         self.split = split
         is_test = self.split == 'test'
-        self.imageset_dir = os.path.join(root_dir, 'KITTI', 'object', 'testing' if is_test else 'training')
+        self.imageset_dir = os.path.join(root_dir, 'KITTI', points_style, 'testing' if is_test else 'training')
 
         split_dir = os.path.join(root_dir, 'KITTI', 'ImageSets', split + '.txt')
         self.image_idx_list = [x.strip() for x in open(split_dir).readlines()]

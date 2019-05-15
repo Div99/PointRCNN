@@ -20,6 +20,7 @@ from tools.train_utils import learning_schedules_fastai as lsf
 
 
 parser = argparse.ArgumentParser(description="arg parser")
+parser.add_argument('--points_style', type=str, default='lidar', help='Points style for training')
 parser.add_argument('--cfg_file', type=str, default='cfgs/default.yaml', help='specify the config for training')
 parser.add_argument("--train_mode", type=str, default='rpn', required=True, help="specify the training mode")
 parser.add_argument("--batch_size", type=int, default=16, required=True, help="batch size for training")
@@ -33,7 +34,7 @@ parser.add_argument('--mgpus', action='store_true', default=False, help='whether
 parser.add_argument("--ckpt", type=str, default=None, help="continue training from this checkpoint")
 parser.add_argument("--rpn_ckpt", type=str, default=None, help="specify the well-trained rpn checkpoint")
 
-parser.add_argument("--gt_database", type=str, default='gt_database/train_gt_database_3level_Car.pkl',
+parser.add_argument("--gt_database", type=str, default='train_gt_database_3level_Car.pkl',
                     help='generated gt database for augmentation')
 parser.add_argument("--rcnn_training_roi_dir", type=str, default=None,
                     help='specify the saved rois for rcnn training when using rcnn_offline mode')
@@ -45,7 +46,9 @@ parser.add_argument("--rcnn_eval_roi_dir", type=str, default=None,
                     help='specify the saved rois for rcnn evaluation when using rcnn_offline mode')
 parser.add_argument("--rcnn_eval_feature_dir", type=str, default=None,
                     help='specify the saved features for rcnn evaluation when using rcnn_offline mode')
+
 args = parser.parse_args()
+args.gt_database = os.path.join('gt_database', args.points_style, args.gt_database)
 
 
 def create_logger(log_file):
@@ -62,7 +65,7 @@ def create_dataloader(logger):
     DATA_PATH = os.path.join('../', 'data')
 
     # create dataloader
-    train_set = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TRAIN.SPLIT, mode='TRAIN',
+    train_set = KittiRCNNDataset(root_dir=DATA_PATH, points_style=args.points_style, npoints=cfg.RPN.NUM_POINTS, split=cfg.TRAIN.SPLIT, mode='TRAIN',
                                  logger=logger,
                                  classes=cfg.CLASSES,
                                  rcnn_training_roi_dir=args.rcnn_training_roi_dir,
@@ -73,7 +76,7 @@ def create_dataloader(logger):
                               drop_last=True)
 
     if args.train_with_eval:
-        test_set = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TRAIN.VAL_SPLIT, mode='EVAL',
+        test_set = KittiRCNNDataset(root_dir=DATA_PATH, points_style=args.points_style, npoints=cfg.RPN.NUM_POINTS, split=cfg.TRAIN.VAL_SPLIT, mode='EVAL',
                                     logger=logger,
                                     classes=cfg.CLASSES,
                                     rcnn_eval_roi_dir=args.rcnn_eval_roi_dir,
